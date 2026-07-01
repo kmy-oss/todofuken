@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b6b">
-<title>都道府県チャンピオン</title>
+<title>あーすわいず都道府県チャンピオン</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
@@ -12,8 +12,8 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="都道府県チャンピオン">
-<meta property="og:title" content="都道府県チャンピオン">
+<meta name="apple-mobile-web-app-title" content="あーすわいず都道府県チャンピオン">
+<meta property="og:title" content="あーすわいず都道府県チャンピオン">
 <meta property="og:description" content="小学生・中学生・高校生以上の3レベルで挑戦！日本の都道府県クイズ（全1000問・オンラインランキングつき）">
 <meta property="og:image" content="/icons/icon-512.png">
 <meta property="og:type" content="website">
@@ -47,6 +47,7 @@
 
   /* Title */
   .title-wrap{text-align:center;margin:18px 0 8px;}
+  .brand{font-size:15px;font-weight:900;color:var(--green-d);letter-spacing:.08em;margin-bottom:2px;}
   .title{
     font-size:clamp(30px,9vw,44px);font-weight:900;line-height:1.15;letter-spacing:.02em;
     background:linear-gradient(90deg,var(--pink),var(--yellow-d),var(--blue));
@@ -81,6 +82,12 @@
   .lv-el{background:linear-gradient(135deg,var(--green),var(--green-d));}
   .lv-jr{background:linear-gradient(135deg,var(--blue),var(--blue-d));}
   .lv-sr{background:linear-gradient(135deg,var(--purple),var(--purple-d));}
+  .lv-cap{background:linear-gradient(135deg,#20bf9b,#0fb9b1);box-shadow:0 6px 0 rgba(0,0,0,.12),0 10px 20px rgba(0,0,0,.12);}
+
+  /* Japan map (県庁所在地モード) */
+  .mapwrap{background:#f2f8f3;border-radius:20px;padding:10px;margin-bottom:14px;box-shadow:inset 0 1px 4px rgba(0,0,0,.06);}
+  .mapwrap svg{display:block;width:100%;height:auto;max-height:300px;}
+  .map-cap{text-align:center;font-size:13px;font-weight:900;color:#0e8a76;margin-top:4px;}
 
   .best-line{text-align:center;font-size:12px;font-weight:800;color:#9a8fb5;margin-top:22px;}
 
@@ -179,12 +186,23 @@
   <section id="start" class="screen">
     <div class="title-wrap">
       <span class="map-emoji">🗾</span>
+      <div class="brand">🌏 あーすわいず</div>
       <div class="title">都道府県<br>チャンピオン</div>
       <div class="sub">名物・県庁所在地・国土・地政学<br>三択クイズで日本まるわかり！</div>
     </div>
 
     <div class="section-h">レベルをえらんでね</div>
     <div class="levels" id="levels"></div>
+
+    <div class="section-h">とくべつモード</div>
+    <div class="levels">
+      <button class="level-btn lv-cap" id="capBtn">
+        <span class="emoji">🗺️</span>
+        <span class="txt"><span class="lname">県庁所在地モード</span>
+        <span class="ldesc">日本地図で場所を見ながら県庁所在地を当てよう</span></span>
+        <span class="badge">1問15点</span>
+      </button>
+    </div>
 
     <div class="best-line" id="bestLine"></div>
 
@@ -201,6 +219,11 @@
       <span class="chip score-chip" id="scoreChip">0 点</span>
     </div>
     <div class="progress"><div class="bar" id="bar"></div></div>
+
+    <div class="mapwrap hidden" id="mapWrap">
+      <div id="mapSvg"></div>
+      <div class="map-cap" id="mapCap">📍 ここはどこ？</div>
+    </div>
 
     <div class="qcard">
       <div class="qnum" id="qNum">第1問（10点）</div>
@@ -249,6 +272,7 @@
 <script src="prefectures.js"></script>
 <script src="geopolitics.js"></script>
 <script src="generator.js"></script>
+<script src="japanmap.js"></script>
 <script>
 (function(){
   "use strict";
@@ -294,6 +318,7 @@
       const b = store.get("best_"+k,0);
       return `${QUIZ_DATA[k].emoji}${QUIZ_DATA[k].label} ${b}点`;
     });
+    parts.push(`🗺️県庁所在地 ${store.get("best_capital",0)}点`);
     $("bestLine").textContent = "🏅 ベスト: " + parts.join("　/　");
   }
 
@@ -315,8 +340,41 @@
     renderQuestion();
   }
 
+  // ---- 県庁所在地モード ----
+  function pickTwo(correct, all, prefer){
+    const p = shuffle([...new Set((prefer||[]).filter(c=>c && c!==correct))]);
+    const rest = shuffle([...new Set(all.filter(c=>c && c!==correct && !p.includes(c)))]);
+    const out=[]; for(const c of p){ if(out.length>=2)break; out.push(c);} for(const c of rest){ if(out.length>=2)break; out.push(c);}
+    return out;
+  }
+  function startCapitalMode(){
+    const d = { label:"県庁所在地", points:15, emoji:"🗺️" };
+    const pool = (window.PREFS||[]).filter(p=>p.name!=="東京都");
+    const allCaps = pool.map(p=>p.cap);
+    const picked = shuffle(pool).slice(0, Math.min(N, pool.length));
+    const qs = picked.map(p=>{
+      const sameRegion = pool.filter(x=>x.region===p.region && x.name!==p.name).map(x=>x.cap);
+      const distr = pickTwo(p.cap, allCaps, sameRegion);
+      const opts = shuffle([p.cap, distr[0], distr[1]]);
+      return { q:`「${p.name}」の県庁所在地は？`, opts, correct:opts.indexOf(p.cap), correctText:p.cap, pref:p.name };
+    });
+    state = { key:"capital", d, qs, idx:0, score:0, correct:0, map:true };
+    show("quiz");
+    $("lvChip").textContent = `${d.emoji} ${d.label}`;
+    $("lvChip").className = "chip lv lv-cap"; $("lvChip").style.color = "#fff";
+    renderQuestion();
+  }
+
   function renderQuestion(){
     const s = state, item = s.qs[s.idx];
+    // 県庁所在地モード：日本地図で場所を表示
+    if(s.map && item.pref && window.buildJapanSVG){
+      $("mapWrap").classList.remove("hidden");
+      $("mapSvg").innerHTML = buildJapanSVG(item.pref);
+      $("mapCap").textContent = `📍「${item.pref}」はこの場所です`;
+    } else {
+      $("mapWrap").classList.add("hidden");
+    }
     $("qCount").textContent = `${s.idx+1} / ${s.qs.length}`;
     $("scoreChip").textContent = `${s.score} 点`;
     $("bar").style.width = ((s.idx)/s.qs.length*100)+"%";
@@ -404,6 +462,8 @@
 
     show("result");
     window.scrollTo({top:0,behavior:"smooth"});
+    // 満点なら紙吹雪でお祝い
+    if(rate===100) setTimeout(()=>confetti({count:150}), 350);
   }
 
   // ---- Leaderboard (online) ----
@@ -412,6 +472,59 @@
   let submitting = false;
 
   function escapeHtml(x){ return String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ---- 紙吹雪（Canvas・ライブラリ不要） ----
+  function confetti(opts){
+    opts = opts || {};
+    const count = opts.count || 130;
+    const power = opts.power || 1;
+    const cvs = document.createElement("canvas");
+    cvs.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999";
+    document.body.appendChild(cvs);
+    const ctx = cvs.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = window.innerWidth, H = window.innerHeight;
+    cvs.width = W * dpr; cvs.height = H * dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const colors = ["#ff6b6b","#feca57","#54a0ff","#26de81","#a55eea","#ff9ff3","#ffffff"];
+    const origins = opts.origins || [{x:W*0.5, y:H*0.30}];
+    const parts = [];
+    for(let i=0;i<count;i++){
+      const o = origins[i % origins.length];
+      const ang = -Math.PI/2 + (Math.random()-0.5)*Math.PI*0.95;
+      const sp = (6 + Math.random()*7) * power;
+      parts.push({
+        x:o.x, y:o.y,
+        vx:Math.cos(ang)*sp*(0.6+Math.random()*0.8),
+        vy:Math.sin(ang)*sp - Math.random()*3,
+        g:0.18+Math.random()*0.1,
+        size:6+Math.random()*7,
+        color:colors[(Math.random()*colors.length)|0],
+        rot:Math.random()*Math.PI, vrot:(Math.random()-0.5)*0.32,
+        life:0, ttl:100+Math.random()*50,
+        rect:Math.random()<0.5
+      });
+    }
+    function tick(){
+      ctx.clearRect(0,0,W,H);
+      let alive=0;
+      for(const p of parts){
+        if(p.life>p.ttl) continue;
+        p.life++; alive++;
+        p.vy+=p.g; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vrot;
+        const a=Math.max(0,1-p.life/p.ttl);
+        ctx.save(); ctx.globalAlpha=a; ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color;
+        if(p.rect) ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+        else { ctx.beginPath(); ctx.arc(0,0,p.size/2,0,7); ctx.fill(); }
+        ctx.restore();
+      }
+      if(alive>0) requestAnimationFrame(tick); else cvs.remove();
+    }
+    requestAnimationFrame(tick);
+  }
+  function confettiCannons(){
+    const W=window.innerWidth, H=window.innerHeight;
+    confetti({count:180, power:1.25, origins:[{x:W*0.12,y:H*0.9},{x:W*0.88,y:H*0.9}]});
+  }
 
   async function fetchBoard(level){
     const r = await fetch(`${API}?level=${encodeURIComponent(level)}`, {cache:"no-store"});
@@ -458,7 +571,11 @@
       const myName = (data.you && data.you.name) || name;
       renderBoard(data.top, myName, state.score);
       $("nameEntry").classList.add("hidden");
-      if(data.rank){ $("youLine").textContent = `あなたは ${data.total}人中 ${data.rank}位！`; }
+      if(data.rank){
+        $("youLine").textContent = (data.rank===1 ? "🎉 " : "") + `あなたは ${data.total}人中 ${data.rank}位！`;
+        if(data.rank===1) confettiCannons();          // 1位は盛大にお祝い
+        else if(data.rank<=3) confetti({count:120});   // 2〜3位も紙吹雪
+      }
       else { $("youLine").textContent = `惜しい！ トップ${data.top.length}入りならず（${myName} ${state.score}点）`; }
       $("lbMsg").textContent = "";
     }catch(e){
@@ -477,8 +594,9 @@
 
   // ---- events ----
   $("nextBtn").addEventListener("click",next);
-  $("retryBtn").addEventListener("click",()=>startQuiz(state.key));
+  $("retryBtn").addEventListener("click",()=> state && state.key==="capital" ? startCapitalMode() : startQuiz(state.key));
   $("homeBtn").addEventListener("click",()=>{ renderStart(); show("start"); });
+  $("capBtn").addEventListener("click", startCapitalMode);
   $("submitScore").addEventListener("click", submitHandler);
   $("nameInput").addEventListener("keydown", e=>{ if(e.key==="Enter") submitHandler(); });
 

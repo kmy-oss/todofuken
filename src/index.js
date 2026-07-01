@@ -3,7 +3,7 @@
 // - /api/scores だけこのWorkerが処理
 // KV名前空間を "SCORES" としてバインドすること（wrangler.toml 参照）
 
-const MAX_SCORE = { elementary: 100, junior: 150, senior: 200 }; // 1問点数 × 10問
+const MAX_SCORE = { elementary: 100, junior: 150, senior: 200, capital: 150 }; // 1問点数 × 10問
 const KEEP = 50;
 
 const SEED = {
@@ -18,6 +18,10 @@ const SEED = {
   senior: [
     { name: "はかせ", score: 180 }, { name: "ソウマ", score: 160 },
     { name: "ちづる", score: 140 }, { name: "ケイ",   score: 120 }, { name: "ユウ", score: 100 }
+  ],
+  capital: [
+    { name: "ちずお", score: 135 }, { name: "みやこ", score: 120 },
+    { name: "はやと", score: 105 }, { name: "りく",   score: 90 },  { name: "あん", score: 75 }
   ]
 };
 function seedBoard(level) {

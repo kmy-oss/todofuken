@@ -1,11 +1,12 @@
 // 都道府県チャンピオン Service Worker
-const CACHE = "todofuken-champ-v5";
+const CACHE = "todofuken-champ-v6";
 const ASSETS = [
   "./",
   "./index.html",
   "./prefectures.js",
   "./geopolitics.js",
   "./generator.js",
+  "./japanmap.js",
   "./manifest.json",
   "./favicon.ico",
   "./icons/icon-16.png",
