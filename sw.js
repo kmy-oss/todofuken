@@ -1,5 +1,5 @@
 // 都道府県チャンピオン Service Worker
-const CACHE = "todofuken-champ-v3";
+const CACHE = "todofuken-champ-v4";
 const ASSETS = [
   "./",
   "./index.html",
