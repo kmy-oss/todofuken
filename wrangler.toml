@@ -1,6 +1,10 @@
 name = "todofuken"
+main = "src/index.js"
 compatibility_date = "2025-06-01"
-pages_build_output_dir = "."
+
+[assets]
+directory = "."
+binding = "ASSETS"
 
 [[kv_namespaces]]
 binding = "SCORES"
