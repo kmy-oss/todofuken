@@ -18,6 +18,9 @@
 <meta property="og:image" content="/icons/icon-512.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg1:#fff3d6; --bg2:#ffe0e6;
@@ -32,9 +35,12 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;}
   body{
-    font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Segoe UI",system-ui,sans-serif;
+    font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Segoe UI",system-ui,sans-serif;
     color:var(--ink);
-    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    background:
+      radial-gradient(1200px 500px at 50% -120px, rgba(255,255,255,.55), transparent 70%),
+      linear-gradient(160deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;
     min-height:100dvh;
     display:flex;justify-content:center;align-items:flex-start;
     padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
@@ -45,42 +51,56 @@
   @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:none;}}
   .hidden{display:none!important;}
 
-  /* Title */
-  .title-wrap{text-align:center;margin:18px 0 8px;}
-  .brand{display:inline-block;font-size:clamp(20px,6.5vw,30px);font-weight:900;color:#fff;
-    letter-spacing:.06em;margin-bottom:8px;padding:6px 18px;border-radius:999px;
-    background:linear-gradient(135deg,var(--green),var(--green-d));
-    box-shadow:0 4px 12px rgba(38,222,129,.35);}
-  .title{
-    font-size:clamp(30px,9vw,44px);font-weight:900;line-height:1.15;letter-spacing:.02em;
-    background:linear-gradient(90deg,var(--pink),var(--yellow-d),var(--blue));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    text-shadow:0 2px 0 rgba(0,0,0,.05);
+  /* Title (hero) */
+  .title-wrap{
+    text-align:center;margin:10px 0 8px;padding:24px 20px 22px;
+    border-radius:28px;position:relative;
+    background:linear-gradient(140deg,#ff8f8f 0%,#ffb07a 45%,#ffd166 100%);
+    box-shadow:0 14px 30px rgba(255,138,120,.38), inset 0 1px 0 rgba(255,255,255,.35);
   }
-  .sub{margin-top:8px;font-size:15px;font-weight:700;color:#7a6f95;}
-  .map-emoji{font-size:56px;display:block;margin:10px 0 2px;animation:bob 2.4s ease-in-out infinite;}
+  .brand{
+    display:inline-block;font-size:clamp(14px,4.4vw,17px);font-weight:900;color:var(--green-d);
+    letter-spacing:.04em;margin-bottom:12px;padding:7px 18px;border-radius:999px;
+    background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.14);
+  }
+  .title{
+    font-size:clamp(32px,9.5vw,46px);font-weight:900;line-height:1.12;letter-spacing:.01em;
+    color:#fff;text-shadow:0 3px 0 rgba(200,80,60,.35), 0 6px 14px rgba(150,50,40,.25);
+  }
+  .sub{margin-top:14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.96);line-height:1.7;
+    text-shadow:0 1px 2px rgba(160,70,50,.25);}
+  .map-emoji{font-size:46px;display:block;margin:0 0 6px;animation:bob 2.4s ease-in-out infinite;
+    filter:drop-shadow(0 4px 6px rgba(150,50,40,.28));}
   @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-8px) rotate(3deg);}}
 
-  .section-h{font-size:15px;font-weight:800;color:#7a6f95;margin:26px 6px 12px;text-align:center;}
+  .section-h{font-size:14px;font-weight:900;color:#8a7f9e;margin:28px 6px 14px;text-align:center;letter-spacing:.04em;}
+  .section-h span{display:inline-block;position:relative;padding:0 14px;}
+  .section-h span::before,.section-h span::after{content:"";position:absolute;top:50%;width:22px;height:3px;border-radius:2px;background:#e4d9ec;}
+  .section-h span::before{right:100%;}
+  .section-h span::after{left:100%;}
 
   /* Level cards */
   .levels{display:flex;flex-direction:column;gap:14px;}
   .level-btn{
     border:none;cursor:pointer;text-align:left;
-    border-radius:22px;padding:18px 18px;color:#fff;
-    display:flex;align-items:center;gap:16px;
-    box-shadow:0 6px 0 rgba(0,0,0,.12),0 10px 20px rgba(0,0,0,.12);
+    border-radius:20px;padding:16px;color:#fff;
+    display:flex;align-items:center;gap:14px;
+    box-shadow:0 6px 0 rgba(0,0,0,.10),0 12px 22px rgba(0,0,0,.14);
     transition:transform .08s, box-shadow .08s;
     font-family:inherit;
   }
-  .level-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.12),0 6px 12px rgba(0,0,0,.12);}
-  .level-btn .emoji{font-size:40px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
-  .level-btn .txt{flex:1;}
-  .level-btn .lname{display:block;font-size:22px;font-weight:900;}
-  .level-btn .ldesc{display:block;font-size:13px;font-weight:700;opacity:.95;margin-top:3px;}
+  .level-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.10),0 6px 12px rgba(0,0,0,.12);}
+  .level-btn .emoji{
+    width:54px;height:54px;flex:0 0 54px;border-radius:16px;
+    background:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);
+    display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;
+  }
+  .level-btn .txt{flex:1;min-width:0;}
+  .level-btn .lname{display:block;font-size:20px;font-weight:900;letter-spacing:.01em;}
+  .level-btn .ldesc{display:block;font-size:12px;font-weight:700;opacity:.95;margin-top:4px;line-height:1.5;}
   .level-btn .badge{
-    background:rgba(255,255,255,.28);border-radius:999px;padding:6px 12px;
-    font-size:13px;font-weight:900;white-space:nowrap;
+    background:rgba(255,255,255,.92);color:#5a4f70;border-radius:999px;padding:7px 12px;
+    font-size:12px;font-weight:900;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.12);
   }
   .lv-el{background:linear-gradient(135deg,var(--green),var(--green-d));}
   .lv-jr{background:linear-gradient(135deg,var(--blue),var(--blue-d));}
@@ -194,10 +214,10 @@
       <div class="sub">名物・県庁所在地・国土・地政学<br>三択クイズで日本まるわかり！</div>
     </div>
 
-    <div class="section-h">レベルをえらんでね</div>
+    <div class="section-h"><span>レベルをえらんでね</span></div>
     <div class="levels" id="levels"></div>
 
-    <div class="section-h">とくべつモード</div>
+    <div class="section-h"><span>とくべつモード</span></div>
     <div class="levels">
       <button class="level-btn lv-cap" id="capBtn">
         <span class="emoji">🗾</span>
